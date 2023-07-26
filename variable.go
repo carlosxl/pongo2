@@ -324,7 +324,7 @@ func (vr *variableResolver) resolve(ctx *ExecutionContext) (*Value, error) {
 					// Calling a field or key
 					switch current.Kind() {
 					case reflect.Struct:
-						current = fieldByNameOrTag(current, part.s)
+						current = fieldByNameOrTag(current, ctx.FieldAliasTag, part.s)
 					case reflect.Map:
 						current = current.MapIndex(reflect.ValueOf(part.s))
 					default:
@@ -353,7 +353,7 @@ func (vr *variableResolver) resolve(ctx *ExecutionContext) (*Value, error) {
 						if err != nil {
 							return nil, err
 						}
-						current = fieldByNameOrTag(current, sv.String())
+						current = fieldByNameOrTag(current, ctx.FieldAliasTag, sv.String())
 					case reflect.Map:
 						sv, err := part.subscript.Evaluate(ctx)
 						if err != nil {
@@ -843,13 +843,13 @@ func (p *Parser) parseVariableElement() (INode, *Error) {
 // We support access field by a special tag `pongo`.
 // If the field has a `pongo` tag, we use the tag value as the field name.
 // Either the original field name or the tag value match will be accepted.
-func fieldByNameOrTag(v reflect.Value, name string) reflect.Value {
+func fieldByNameOrTag(v reflect.Value, tag, ident string) reflect.Value {
 	if t := v.Type(); t.Kind() != reflect.Struct {
 		return reflect.Value{}
 	}
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Type().Field(i)
-		if field.Tag.Get("pongo") == name || field.Name == name {
+		if field.Tag.Get(tag) == ident || field.Name == ident {
 			return v.Field(i)
 		}
 	}

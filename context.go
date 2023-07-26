@@ -14,6 +14,12 @@ func SetAutoescape(newValue bool) {
 	autoescape = newValue
 }
 
+var fieldAliasTag = "pongo2"
+
+func SetFieldAliasTag(newValue string) {
+	fieldAliasTag = newValue
+}
+
 // A Context type provides constants, variables, instances or functions to a template.
 //
 // pongo2 automatically provides meta-information or functions through the "pongo2"-key.
@@ -67,10 +73,11 @@ type ExecutionContext struct {
 	template   *Template
 	macroDepth int
 
-	Autoescape bool
-	Public     Context
-	Private    Context
-	Shared     Context
+	Autoescape    bool
+	FieldAliasTag string
+	Public        Context
+	Private       Context
+	Shared        Context
 }
 
 var pongo2MetaContext = Context{
@@ -86,9 +93,10 @@ func newExecutionContext(tpl *Template, ctx Context) *ExecutionContext {
 	return &ExecutionContext{
 		template: tpl,
 
-		Public:     ctx,
-		Private:    privateCtx,
-		Autoescape: autoescape,
+		Public:        ctx,
+		Private:       privateCtx,
+		Autoescape:    autoescape,
+		FieldAliasTag: fieldAliasTag,
 	}
 }
 
