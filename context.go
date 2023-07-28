@@ -104,9 +104,10 @@ func NewChildExecutionContext(parent *ExecutionContext) *ExecutionContext {
 	newctx := &ExecutionContext{
 		template: parent.template,
 
-		Public:     parent.Public,
-		Private:    make(Context),
-		Autoescape: parent.Autoescape,
+		Public:        parent.Public,
+		Private:       make(Context),
+		Autoescape:    parent.Autoescape,
+		FieldAliasTag: parent.FieldAliasTag,
 	}
 	newctx.Shared = parent.Shared
 
