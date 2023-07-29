@@ -177,8 +177,10 @@ func (expr *relationalExpression) Evaluate(ctx *ExecutionContext) (*Value, *Erro
 		}
 		switch expr.opToken.Val {
 		case "<=":
-			if v1.IsFloat() || v2.IsFloat() {
-				return AsValue(v1.Float() <= v2.Float()), nil
+			// We provide more Pythonic way of comparing numbers, so that we can compare int and float.
+			if v1.IsNumber() || v2.IsNumber() {
+				left, right := v1.castToFloat64(), v2.castToFloat64()
+				return AsValue(left <= right || math.Abs(left-right) < epsilon), nil
 			}
 			if v1.IsTime() && v2.IsTime() {
 				tm1, tm2 := v1.Time(), v2.Time()
@@ -186,8 +188,10 @@ func (expr *relationalExpression) Evaluate(ctx *ExecutionContext) (*Value, *Erro
 			}
 			return AsValue(v1.Integer() <= v2.Integer()), nil
 		case ">=":
-			if v1.IsFloat() || v2.IsFloat() {
-				return AsValue(v1.Float() >= v2.Float()), nil
+			// We provide more Pythonic way of comparing numbers, so that we can compare int and float.
+			if v1.IsNumber() || v2.IsNumber() {
+				left, right := v1.castToFloat64(), v2.castToFloat64()
+				return AsValue(left >= right || math.Abs(left-right) < epsilon), nil
 			}
 			if v1.IsTime() && v2.IsTime() {
 				tm1, tm2 := v1.Time(), v2.Time()
@@ -197,16 +201,20 @@ func (expr *relationalExpression) Evaluate(ctx *ExecutionContext) (*Value, *Erro
 		case "==":
 			return AsValue(v1.EqualValueTo(v2)), nil
 		case ">":
-			if v1.IsFloat() || v2.IsFloat() {
-				return AsValue(v1.Float() > v2.Float()), nil
+			// We provide more Pythonic way of comparing numbers, so that we can compare int and float.
+			if v1.IsNumber() || v2.IsNumber() {
+				left, right := v1.castToFloat64(), v2.castToFloat64()
+				return AsValue(left > right && math.Abs(left-right) > epsilon), nil
 			}
 			if v1.IsTime() && v2.IsTime() {
 				return AsValue(v1.Time().After(v2.Time())), nil
 			}
 			return AsValue(v1.Integer() > v2.Integer()), nil
 		case "<":
-			if v1.IsFloat() || v2.IsFloat() {
-				return AsValue(v1.Float() < v2.Float()), nil
+			// We provide more Pythonic way of comparing numbers, so that we can compare int and float.
+			if v1.IsNumber() || v2.IsNumber() {
+				left, right := v1.castToFloat64(), v2.castToFloat64()
+				return AsValue(left < right && math.Abs(left-right) > epsilon), nil
 			}
 			if v1.IsTime() && v2.IsTime() {
 				return AsValue(v1.Time().Before(v2.Time())), nil

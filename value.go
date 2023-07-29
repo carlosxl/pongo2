@@ -496,9 +496,13 @@ func (v *Value) Interface() any {
 
 // EqualValueTo checks whether two values are containing the same value or object (if comparable).
 func (v *Value) EqualValueTo(other *Value) bool {
-	// comparison of uint with int fails using .Interface()-comparison (see issue #64)
-	if v.IsInteger() && other.IsInteger() {
-		return v.Integer() == other.Integer()
+	// We provide a Pythonic way of comparing numbers, because Django does so, too.
+	// For example, the following statement is true in Python:
+	// {% if 1 == 1.0 %}
+	// This is not true in Go, so we have to do this manually.
+	if v.IsNumber() && other.IsNumber() {
+		v1, v2 := v.castToFloat64(), other.castToFloat64()
+		return (v1-v2) < epsilon && (v2-v1) < epsilon
 	}
 	if v.IsTime() && other.IsTime() {
 		return v.Time().Equal(other.Time())
@@ -511,6 +515,15 @@ func (v *Value) EqualValueTo(other *Value) bool {
 	return v.val.CanInterface() && other.val.CanInterface() &&
 		v.val.Type().Comparable() && other.val.Type().Comparable() &&
 		v.Interface() == other.Interface()
+}
+
+const epsilon = 1e-9
+
+func (v *Value) castToFloat64() float64 {
+	if v.IsInteger() {
+		return float64(v.Integer())
+	}
+	return v.Float()
 }
 
 type sortedKeys []reflect.Value
